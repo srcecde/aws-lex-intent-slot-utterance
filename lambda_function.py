@@ -1,3 +1,14 @@
+"""
+-*- coding: utf-8 -*-
+========================
+Bot
+========================
+
+Contributor: Chirag Rathod (Srce Cde)
+
+========================
+"""
+
 import sys, os, boto3, urllib, io
 import config
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/lib")
@@ -75,10 +86,6 @@ def create_bot(intent_list = None, slot_list = None, arn = None):
     #             )
 
 
-
-
-
-
 def lambda_handler(event, context):
     if event:
         file_obj = event['Records'][0]
@@ -87,23 +94,28 @@ def lambda_handler(event, context):
         csv_path = io.BytesIO(fileObj["Body"].read())
         df = pd.read_csv(csv_path, sep='\t')
         df.drop(df.columns[-5:], axis = 1, inplace=True)
-        df.columns = ["Player", "Span", "Match", "Runs", "High Score", "Average", "Century", "Wickets"]
         d = dict(df.dtypes)
         sl = {}
         temp = []
+        il = []
 
         for i,j in d.items():
             if j in ["int64", "float64"]:
-                temp.append({"slotType": "AMAZON.NUMBER", "name": i.lower().replace(" ", "_"), "slotConstraint": "Optional"})
+                temp.append({"slotType": "AMAZON.NUMBER", "name": i.lower().strip().replace(" ", "_"), "slotConstraint": "Optional"})
             if i == "Player":
-                temp.append({"slotType": "AMAZON.Person", "name": i.lower().replace(" ", "_"), "slotConstraint": "Optional"})
+                temp.append({"slotType": "AMAZON.Person", "name": i.lower().strip().replace(" ", "_"), "slotConstraint": "Optional"})
             if i == "Span":
-                temp.append({"slotType": "AMAZON.DATE", "name": i.lower().replace(" ", "_"), "slotConstraint": "Optional"})
+                temp.append({"slotType": "AMAZON.DATE", "name": i.lower().strip().replace(" ", "_"), "slotConstraint": "Optional"})
 
-        il = [{"maxRuns": "what is the high score of {player}"}, {"scoreXcentury": "who scored more than {century} century"}, {"run": "how many runs did {player} scored"}]
+        intent_utter = config.intent_utterence
+        intent_utter_split = intent_utter.split(",")
+        for i in intent_utter_split:
+            temp_split = i.split(":")
+            il.append({temp_split[0]: temp_split[1]})
 
+        # il = [{"maxRuns": "what is the high score of {player}"}, {"scoreXcentury": "who scored more than {century} century"}, {"run": "how many runs did {player} scored"}]
 
-        resp = lam.create_function(FunctionName = "config.lex_func_name", Runtime = "python3.6", Role = config.role, Handler = "lambda_function.lambda_handler", Code = {"S3Bucket": config.bucket_name, "S3Key": config.bucket_key}, Timeout= 300)
+        resp = lam.create_function(FunctionName = config.lex_func_name, Runtime = "python3.6", Role = config.role, Handler = "lambda_function.lambda_handler", Code = {"S3Bucket": config.bucket_name, "S3Key": config.bucket_key}, Timeout= 300)
         arn = resp["FunctionArn"]
         lam.add_permission(FunctionName = arn, StatementId = "unique", Action = "lambda:invokeFunction", Principal = "lex.amazonaws.com")
 

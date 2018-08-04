@@ -1,4 +1,14 @@
-#maxruns, scorexcentury, runs
+"""
+-*- coding: utf-8 -*-
+========================
+Bot
+========================
+
+Contributor: Chirag Rathod (Srce Cde)
+
+========================
+"""
+
 import sys, os, boto3
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/lib")
 import pandas as pd
@@ -46,7 +56,3 @@ def lambda_handler(event, context):
         else:
             msg = "No records found"
             return confirm_intent(session_attributes, intent_name, msg)
-
-
-# 
-# lambda_handler("","")
