@@ -67,25 +67,6 @@ def create_bot(intent_list = None, slot_list = None, arn = None):
     childDirected= True)
     # createVersion= False)
 
-    # for i in slot_list:
-
-    #         response = client1.put_slot_type(
-    #                 name="auto_"+str(i),
-    #                 # description='string',
-    #                 # enumerationValues=[
-    #                 #     {
-    #                 #         'value': 'string',
-    #                 #         'synonyms': [
-    #                 #             'string',
-    #                 #         ]
-    #                 #     },
-    #                 # ],
-    #                 # checksum='string',
-    #                 # valueSelectionStrategy='ORIGINAL_VALUE'|'TOP_RESOLUTION',
-    #                 # createVersion=True|False
-    #             )
-
-
 def lambda_handler(event, context):
     if event:
         file_obj = event['Records'][0]
@@ -113,7 +94,6 @@ def lambda_handler(event, context):
             temp_split = i.split(":")
             il.append({temp_split[0]: temp_split[1]})
 
-        # il = [{"maxRuns": "what is the high score of {player}"}, {"scoreXcentury": "who scored more than {century} century"}, {"run": "how many runs did {player} scored"}]
 
         resp = lam.create_function(FunctionName = config.lex_func_name, Runtime = "python3.6", Role = config.role, Handler = "lambda_function.lambda_handler", Code = {"S3Bucket": config.bucket_name, "S3Key": config.bucket_key}, Timeout= 300)
         arn = resp["FunctionArn"]
